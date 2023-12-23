@@ -9,12 +9,17 @@
       class="py-2 px-1 w-full bg-transparent border-b
       focus:border-weather-secondary focus:outline-none 
       focus:shadow-[0px_1px_0_0_#004E71]"/>
-      <ul class="absolute bg-weather-secondary text-white w-full shadow-md py-2 px-1 top-[66px]">
-        <li v-for="searchResult in mapboxSearchResults"
-        :key="searchResult.id"
-        class="py-2 cursor-pointer">
-          {{ searchResult.place_name }}
-        </li>
+      <ul class="absolute bg-weather-secondary text-white w-full shadow-md py-2 px-1 top-[66px]" v-if="mapboxSearchResults">
+        <p v-if="searchError">Sorry something went wrong, please try again! </p>
+        <p v-if="!serverError && mapboxSearchResults.length === 0"> No city found with this name, please try again!</p>
+        <template v-else>
+          <li v-for="searchResult in mapboxSearchResults"
+            :key="searchResult.id"
+            class="py-2 cursor-pointer"
+            @click="previewCity(searchResult)">
+              {{ searchResult.place_name }}
+          </li>
+        </template>
       </ul>
     </div>
   </main>
@@ -23,11 +28,15 @@
 <script setup>
 import { ref } from 'vue';
 import axios from "axios";
+import { useRouter } from 'vue-router';
 
+
+const router = useRouter();
 const mapboxAPIKey= "pk.eyJ1IjoiaGFzYW5zYWxpbTc0OSIsImEiOiJjbHFja3dlZmkwM2d2MmtvNnA4MmRweWl5In0.6z45gWsOyVVDNORD27xvHg"
 ;const searchQuery = ref("");
 const queryTimeOut= ref(null);
 const mapboxSearchResults = ref(null);
+const searchError = ref(null);
 
 const getSearchResults = async () => {
   clearTimeout(queryTimeOut.value);
@@ -41,16 +50,28 @@ const getSearchResults = async () => {
 
         if (result.data && result.data.features) {
           mapboxSearchResults.value = result.data.features;
-        } else {
-          console.error("Unexpected API response:", result.data);
         }
       } catch (error) {
-        console.error("Error fetching data from the API:", error);
+        searchError.value = true;
       }
     } else {
       mapboxSearchResults.value = null;
     }
   }, 300);
 };
+
+const previewCity = (searchResult) =>{
+  console.log(searchResult);
+  const [city, state] = searchResult.place_name.split(",");
+  router.push({
+    name: "cityView",
+    params: { state: state.replaceAll(" ",""), city: city},
+    query:{
+      lat: searchResult.geometry.coordinates[1],
+      lng: searchResult.geometry.coordinates[0],
+      preview: true,
+    }
+  });
+}
 
 </script>
