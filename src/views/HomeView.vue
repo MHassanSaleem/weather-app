@@ -42,8 +42,8 @@ import CityCardSkeleton from '@/components/CityCardSkeleton.vue';
 
 
 const router = useRouter();
-const mapboxAPIKey= "pk.eyJ1IjoiaGFzYW5zYWxpbTc0OSIsImEiOiJjbHFja3dlZmkwM2d2MmtvNnA4MmRweWl5In0.6z45gWsOyVVDNORD27xvHg"
-;const searchQuery = ref("");
+const mapboxAPIKey = import.meta.env.VITE_MAPBOX_API_KEY;
+const searchQuery = ref("");
 const queryTimeOut= ref(null);
 const mapboxSearchResults = ref(null);
 const searchError = ref(null);
